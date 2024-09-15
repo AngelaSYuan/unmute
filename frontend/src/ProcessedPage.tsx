@@ -17,6 +17,15 @@ function ProcessedPage() {
     <div className="container">
             <Header/>
             <div className="videoContainer">
+                <div>
+                  <video id="videoElement" controls>
+                      <source src="./SymphonicTest.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                  </video>
+                  <div className="scrolling-text">
+                      <p id="textLine">This is the scrolling text over the video.</p>
+                  </div>
+                </div>
                 <img src={Tmp}/>
                 <div style={{display:"flex", width:'100%'}}>
                   <button className="button purple" onClick={handleRecordNewVideo} style={{width:'50%'}}> 

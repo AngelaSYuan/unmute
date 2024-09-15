@@ -10,21 +10,26 @@ import './App.css';
 function StartPage() {
     const navigate = useNavigate(); // Hook to programmatically navigate to a route
 
-    const goToNextPage = () => {
-        navigate('/processed'); // Navigate to Page 2
-    };
-
     const [file, setFile] = useState<File | null>(null)
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isRecording, setIsRecording] = useState(false);
+    const [message, setMessage] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [isRecording, setIsRecording] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setFile(event.target.files[0])
-      setMessage('') // Clear previous messages
+    const handleRecording = () => { 
+        if (!isRecording) {
+            setIsRecording(true);
+            return;
+        }
+        setIsRecording(false);
+        // TODO: handleSubmit
+        navigate('/processed'); // Navigate to Page 2
     }
-  }
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+        setFile(event.target.files[0])
+        setMessage('') // Clear previous messages
+        }
+    }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -65,13 +70,13 @@ function StartPage() {
             <Header />
             <div className="videoContainer">
                 <img src={Tmp}/>
-                {!isRecording && <button className="button purple" onClick={goToNextPage} style={{width:'100%'}}>
+                {!isRecording && <button className="button purple" onClick={handleRecording} style={{width:'100%'}}>
                         <img src={Record} alt="Record button"/>
                         Record video
                 </button>}
-                {isRecording && <button className="button purple" onClick={setIsRecording(true)} style={{width:'100%'}}>
-                        <img src={Record} alt="Record button"/>
-                        Stop video
+                {isRecording && <button className="button red" onClick={handleRecording} style={{width:'100%'}}>
+                    <img src={Record} alt="Record button"/>
+                    Stop recording
                 </button>}
                 <form onSubmit={handleSubmit}>
                 <input type="file" onChange={handleFileChange} accept="video/*" />

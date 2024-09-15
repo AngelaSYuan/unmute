@@ -41,6 +41,9 @@
 .black{
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%),#000000;
 }
+.red{
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%), #BB3D3F;
+}
 .tag{
     border-radius: 30px;
     background: rgba(0, 0, 0, 0.05);
