@@ -17,6 +17,7 @@ function StartPage() {
     const [file, setFile] = useState<File | null>(null)
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isRecording, setIsRecording] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -64,10 +65,14 @@ function StartPage() {
             <Header />
             <div className="videoContainer">
                 <img src={Tmp}/>
-                <button className="button purple" onClick={goToNextPage} style={{width:'100%'}}>
+                {!isRecording && <button className="button purple" onClick={goToNextPage} style={{width:'100%'}}>
                         <img src={Record} alt="Record button"/>
                         Record video
-                </button>
+                </button>}
+                {isRecording && <button className="button purple" onClick={setIsRecording(true)} style={{width:'100%'}}>
+                        <img src={Record} alt="Record button"/>
+                        Stop video
+                </button>}
                 <form onSubmit={handleSubmit}>
                 <input type="file" onChange={handleFileChange} accept="video/*" />
                 <button type="submit" disabled={isLoading || !file}>

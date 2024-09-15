@@ -21,7 +21,7 @@ function ProcessedPage() {
                 <div style={{display:"flex", width:'100%'}}>
                   <button className="button purple" onClick={handleRecordNewVideo} style={{width:'50%'}}> 
                     <img src={Record} alt="Record new video"/>
-                    Record video
+                    Record new video
                   </button>
                   <button className="button black" onClick={handleDownloadVideo} style={{width:'50%'}}> 
                     <img src={Download} alt="Download video"/>
