@@ -41,10 +41,11 @@ const VideoPlayerWithCaptions: React.FC<VideoPlayerWithCaptionsProps> = ({ video
     };
 
     const playAnimation = () => {
+        const video = videoRef.current;
         if (captionsRef.current && videoRef.current) {
             captionsRef.current.style.animation = 'none';
             captionsRef.current.offsetHeight;
-            captionsRef.current.style.animation =  `scroll-text 7s linear 1 forwards`;
+            captionsRef.current.style.animation =  `scroll-text ${video.duration}s linear 1 forwards`;
         }
     };
 
