@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from './assets/logo_black.png';
-import SymphonicLogo from './assets/symphonic_logo.png';
+// import SymphonicLogo from './assets/symphonic_logo.png';
 import PoweredBySymphonic from './assets/powered_by.png';
 import Tmp from './assets/test_image.png';
 import Record from './assets/record.png';
@@ -24,7 +24,7 @@ function StartPage() {
             <img src={PoweredBySymphonic} alt="Powered by Symphonic" style={{ width: '271px'}}/>
             <div className="videoContainer">
                 <img src={Tmp}/>
-                    <button className="purpleButton"onClick={goToNextPage}> <img src={Record} alt="Record button"/>Record video</button>
+                    <button className="purpleButton" onClick={goToNextPage}> <img src={Record} alt="Record button"/>Record video</button>
             </div>
             <h3>Speak, Even When You Can’t.</h3>
         </div>
