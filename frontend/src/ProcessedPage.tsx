@@ -6,6 +6,7 @@ import Record from './assets/record.png';
 import VideoPlayerWithCaptions from './VideoPlayerWithCaptions';
 
 function ProcessedPage() {
+  const dummyText = "Lorem ipsum odor amet, consectetuer adipiscing elit. Metus dis congue class hac proin pulvinar; metus proin. Vivamus dictumst adipiscing mi primis magna parturient. Imperdiet maximus mauris odio; ullamcorper dui mollis. Pharetra elit hendrerit diam, nam lacus tellus. Nec varius senectus lacinia hendrerit nascetur dictum id. Ultrices tempus himenaeos conubia; rhoncus urna laoreet vehicula potenti? Torquent facilisis est rhoncus nulla risus hac. Porta euismod vestibulum sagittis hendrerit lobortis condimentum dignissim. Suscipit elementum non eros ullamcorper duis tellus per metus. Eros quisque sodales euismod amet curae arcu nisl. Quisque per etiam accumsan potenti semper orci. Morbi risus amet libero consequat dis mus dictum sed ligula. Egestas aenean a nam quis non rutrum tellus. Proin tempus curae faucibus et tellus vitae orci elit? Luctus nec habitant dictum blandit efficitur lobortis montes, iaculis nunc. Tempor hac ornare id tempor tincidunt ac. Fringilla ante inceptos habitant curabitur; urna bibendum per. Ad dolor iaculis dapibus facilisis imperdiet. Ornare ornare quisque eget elementum et fermentum. Praesent sociosqu euismod arcu viverra lacinia nisl sit ullamcorper laoreet."
     const location = useLocation();
     const navigate = useNavigate();
     const [transcription, setTranscription] = useState('');
