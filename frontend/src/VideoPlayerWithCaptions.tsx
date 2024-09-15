@@ -30,6 +30,7 @@ const VideoPlayerWithCaptions: React.FC<VideoPlayerWithCaptionsProps> = ({ video
         const video = videoRef.current;
         if (video) {
             if (video.paused) {
+                playAnimation();
                 video.play();
                 setIsPlaying(true);
             } else {
@@ -39,30 +40,26 @@ const VideoPlayerWithCaptions: React.FC<VideoPlayerWithCaptionsProps> = ({ video
         }
     };
 
+    const playAnimation = () => {
+        if (captionsRef.current && videoRef.current) {
+            captionsRef.current.style.animation = 'none';
+            captionsRef.current.offsetHeight;
+            captionsRef.current.style.animation =  `scroll-text 8s linear 1 forwards`;
+        }
+    };
+
     return (
-        <div style={{ position: 'relative', width: '100%', maxWidth: '640px' }}>
+        <div style={{ position: 'relative', overflow:'hidden'}}>
             <video
                 ref={videoRef}
                 src={videoSrc}
-                style={{ width: '100%', height: 'auto' }}
+                style={{ borderRadius: '12px' }}
                 onClick={togglePlayPause}
             />
             <div
                 ref={captionsRef}
-                style={{
-                    position: 'absolute',
-                    bottom: '0',
-                    left: '0',
-                    right: '0',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    color: 'white',
-                    padding: '10px',
-                    maxHeight: '30%',
-                    overflowY: 'hidden',
-                    textAlign: 'center',
-                    fontSize: '16px',
-                    lineHeight: '1.5',
-                }}
+                className="scrolling-text"
+                id="scroll-text"
             >
                 {captions}
             </div>

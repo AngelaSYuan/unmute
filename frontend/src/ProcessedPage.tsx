@@ -66,7 +66,10 @@ function ProcessedPage() {
     };
 
     const handleRecordNewVideo = () => {
-        navigate('/?record=true');
+        navigate('/');
+    };
+    const removeQuotes = (text: string) => {
+        return text.replace(/^"|"$/g, '');
     };
 
     return (
@@ -77,7 +80,7 @@ function ProcessedPage() {
                     {videoURL && (
                         <VideoPlayerWithCaptions
                             videoSrc={videoURL}
-                            captions={transcription}
+                            captions={removeQuotes(transcription)}
                         />
                     )}
                 </div>
