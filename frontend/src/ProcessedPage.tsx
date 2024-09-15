@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Download from './assets/download.svg';
 import Record from './assets/record.png';
+import Spinner from './assets/spinner.svg';
+import Logo from './assets/logo_color.png';
 import VideoPlayerWithCaptions from './VideoPlayerWithCaptions';
 
 function ProcessedPage() {
@@ -11,6 +13,8 @@ function ProcessedPage() {
     const [transcription, setTranscription] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [videoURL, setVideoURL] = useState('');
+    const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+    const overlayRef = useRef(null);
 
     useEffect(() => {
         if (location.state && location.state.videoBlob) {
@@ -19,6 +23,20 @@ function ProcessedPage() {
             transcribeVideo(location.state.videoBlob);
         }
     }, [location.state]);
+
+    useEffect(() => {
+        if (isProcessing) {
+            setIsOverlayVisible(true);
+        } else {
+            const overlay = overlayRef.current;
+            if (overlay) {
+                overlay.addEventListener('transitionend', () => {
+                    setIsOverlayVisible(false);
+                }, { once: true });
+                overlay.classList.add('fade-out');
+            }
+        }
+    }, [isProcessing]);
 
     const transcribeVideo = async (videoBlob) => {
         setIsProcessing(true);
@@ -96,6 +114,17 @@ function ProcessedPage() {
 
     return (
         <div className="container">
+            {isOverlayVisible && (
+                <div ref={overlayRef} className={`processing-overlay ${isProcessing ? '' : 'fade-out'}`}>
+                    <div className="processing-content">
+                        <div style={{display: "flex", alignItems: "center"}}>
+                            <img src={Logo} alt="Unmute" width="100px"/>
+                            <h2>-ing now...</h2>
+                        </div>
+                        <img src={Spinner} alt="Processing video" width="80px"/>
+                    </div>
+                </div>
+            )}
             <Header />
             <div className="videoContainer">
                 <div style={{ width: '100%', maxWidth: '640px' }}>
@@ -116,7 +145,6 @@ function ProcessedPage() {
                         Download video
                     </button>
                 </div>
-                {isProcessing && <p>Processing video...</p>}
             </div>
             <h3>Speak, Even When You Can't.</h3>
         </div>
