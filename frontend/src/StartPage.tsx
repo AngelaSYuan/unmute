@@ -11,6 +11,7 @@ function StartPage() {
     const videoRef = useRef(null);
     const mediaRecorderRef = useRef(null);
     const [recordedChunks, setRecordedChunks] = useState([]);
+    const [countdown, setCountdown] = useState(null);
 
     useEffect(() => {
         async function setupCamera() {
@@ -32,11 +33,22 @@ function StartPage() {
 
     const handleRecording = () => {
         if (!isRecording) {
-            startRecording(videoRef.current.srcObject);
+            setCountdown(3);
         } else {
             stopRecording();
         }
     }
+
+    useEffect(() => {
+        let timer;
+        if (countdown !== null && countdown > 0) {
+            timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        } else if (countdown === 0) {
+            startRecording(videoRef.current.srcObject);
+            setCountdown(null);
+        }
+        return () => clearTimeout(timer);
+    }, [countdown]);
 
     const startRecording = (stream) => {
         setIsRecording(true);
@@ -70,9 +82,12 @@ function StartPage() {
     return (
         <div className="container">
             <Header />
-            <div className="videoContainer">
-                <video ref={videoRef} autoPlay muted playsInline style={{width: '100%', height: 'auto'}} />
-                <button className={`button ${isRecording ? 'red' : 'purple'}`} onClick={handleRecording} style={{width:'100%'}}>
+            <div className={`videoContainer  ${isRecording && "red-border"}`}>
+                <video className = "videoEffect"ref={videoRef} autoPlay muted playsInline style={{width: '100%', height: 'auto'}} />
+                {countdown !== null && (
+                    <div className="countdown">{countdown === 0 ? 'Go!' : countdown}</div>
+                )}
+                <button className={`button ${isRecording ? 'red' : 'purple'}`} onClick={handleRecording} style={{width:'100%'}} disabled={countdown !== null}>
                     <img src={Record} alt="Record button"/>
                     {isRecording ? 'Stop recording' : 'Record video'}
                 </button>

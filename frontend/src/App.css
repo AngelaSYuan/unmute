@@ -30,7 +30,7 @@
     gap: 16px;
 
     color: #FFF;
-    font-size: 24px;
+    font-size: 20px;
     text-transform: uppercase;
     font-weight: 600;
 }
@@ -43,6 +43,10 @@
 }
 .red{
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%), #BB3D3F;
+}
+.red-border{
+    border: 1px solid rgba(187, 61, 63, 0.50);
+    background: rgba(187, 61, 63, 0.10);
 }
 .tag{
     border-radius: 30px;
@@ -66,6 +70,18 @@
     text-transform: uppercase;
     white-space: nowrap;
 }
+
+.countdown {
+    font-size: 120px;
+    text-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+    font-weight: 500;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
 /* Text scrolling effect */
 @keyframes scroll-text {
     0% {
