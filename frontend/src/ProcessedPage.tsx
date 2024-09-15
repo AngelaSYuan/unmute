@@ -53,15 +53,38 @@ function ProcessedPage() {
         }
     };
 
-    const handleDownloadVideo = () => {
+    const handleDownloadVideo = async () => {
         if (location.state && location.state.videoBlob) {
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = videoURL;
-            a.download = 'recorded_video.webm';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(videoURL);
+            try {
+                const formData = new FormData();
+                formData.append('video', location.state.videoBlob, 'recorded_video.webm');
+
+                console.log('Sending video for conversion...');
+                const response = await fetch('http://127.0.0.1:5000/api/convert-to-mp4', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                console.log('Conversion successful, downloading...');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'recorded_video.mp4';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error converting video:', error);
+                alert(`Failed to convert and download video: ${error.message}`);
+            }
         }
     };
 
