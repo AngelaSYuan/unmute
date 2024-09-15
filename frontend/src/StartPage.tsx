@@ -1,92 +1,83 @@
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from './Header';
-import Tmp from './assets/test_image.png';
 import Record from './assets/record.png';
-import axios from 'axios';
-import { useState } from 'react';
 import './App.css';
 
-
 function StartPage() {
-    const navigate = useNavigate(); // Hook to programmatically navigate to a route
-
-    const [file, setFile] = useState<File | null>(null)
-    const [message, setMessage] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
+    const navigate = useNavigate();
+    const location = useLocation();
     const [isRecording, setIsRecording] = useState(false);
+    const videoRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
+    const [recordedChunks, setRecordedChunks] = useState([]);
 
-    const handleRecording = () => { 
+    useEffect(() => {
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+                // Start recording immediately if coming from ProcessedPage
+                if (location.search === '?record=true') {
+                    startRecording(stream);
+                }
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+            }
+        }
+        setupCamera();
+    }, [location.search]);
+
+    const handleRecording = () => {
         if (!isRecording) {
-            setIsRecording(true);
-            return;
+            startRecording(videoRef.current.srcObject);
+        } else {
+            stopRecording();
         }
+    }
+
+    const startRecording = (stream) => {
+        setIsRecording(true);
+        setRecordedChunks([]);
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.ondataavailable = handleDataAvailable;
+        mediaRecorder.start();
+    }
+
+    const stopRecording = () => {
+        mediaRecorderRef.current.stop();
         setIsRecording(false);
-        // TODO: handleSubmit
-        navigate('/processed'); // Navigate to Page 2
     }
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-        setFile(event.target.files[0])
-        setMessage('') // Clear previous messages
+
+    const handleDataAvailable = (event) => {
+        if (event.data.size > 0) {
+            setRecordedChunks((prev) => prev.concat(event.data));
         }
     }
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!file) {
-      setMessage('Please select a file')
-      return
-    }
-
-    setIsLoading(true)
-    setMessage('Processing video...')
-
-    const formData = new FormData()
-    formData.append('video', file)
-
-    console.log('Sending request to backend...')
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/api/process_video', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      console.log('Response received:', response.data)
-      setMessage(response.data.result || 'Video processed successfully')
-    } catch (error) {
-      console.error('Error details:', error)
-      if (axios.isAxiosError(error)) {
-        setMessage(`Error: ${error.response?.data || error.message}`)
-      } else {
-        setMessage('An unexpected error occurred')
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    useEffect(() => {
+        if (recordedChunks.length > 0 && !isRecording) {
+            const blob = new Blob(recordedChunks, {
+                type: "video/webm"
+            });
+            navigate('/processed', { state: { videoBlob: blob } });
+        }
+    }, [recordedChunks, isRecording, navigate]);
 
     return (
         <div className="container">
             <Header />
             <div className="videoContainer">
-                <img src={Tmp}/>
-                {!isRecording && <button className="button purple" onClick={handleRecording} style={{width:'100%'}}>
-                        <img src={Record} alt="Record button"/>
-                        Record video
-                </button>}
-                {isRecording && <button className="button red" onClick={handleRecording} style={{width:'100%'}}>
+                <video ref={videoRef} autoPlay muted playsInline style={{width: '100%', height: 'auto'}} />
+                <button className={`button ${isRecording ? 'red' : 'purple'}`} onClick={handleRecording} style={{width:'100%'}}>
                     <img src={Record} alt="Record button"/>
-                    Stop recording
-                </button>}
-                <form onSubmit={handleSubmit}>
-                <input type="file" onChange={handleFileChange} accept="video/*" />
-                <button type="submit" disabled={isLoading || !file}>
-                {isLoading ? 'Processing...' : 'Process Video'}
+                    {isRecording ? 'Stop recording' : 'Record video'}
                 </button>
-            </form>
-            {message && <p>{message}</p>}
             </div>
-            <h3>Speak, Even When You Can’t.</h3>
+            <h3>Speak, Even When You Can't.</h3>
         </div>
     );
 }
