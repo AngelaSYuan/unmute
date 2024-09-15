@@ -15,6 +15,11 @@ CORS(
 )
 
 
+@app.route("/", methods=["GET"])
+def root():
+    return "Hello World"
+
+
 @app.route("/api/transcribe", methods=["POST"])
 def transcribe():
     if "video" not in request.files:
