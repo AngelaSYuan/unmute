@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import Logo from './assets/logo_black.png';
-import SymphonicLogo from './assets/symphonic_logo.png';
 import Tmp from './assets/test_image.png';
 import Record from './assets/record.png';
 import Download from './assets/download.svg';
+import Header from './Header';
 import './App.css';
 
 function ProcessedPage() {
@@ -16,19 +15,15 @@ function ProcessedPage() {
   }
   return (
     <div className="container">
-            <img src={Logo} alt="Logo" style={{ width: '118px', marginBottom:'60px'}}/>
-            <div className="tag" style={{marginBottom:'24px'}}>
-                <img src={SymphonicLogo} alt="Symphonic Logo" style={{ width: '24px'}}/>
-                Powered by Symphonic
-            </div>
+            <Header/>
             <div className="videoContainer">
                 <img src={Tmp}/>
-                <div style={{display:"flex"}}>
-                  <button className="button purple" onClick={handleRecordNewVideo}> 
+                <div style={{display:"flex", width:'100%'}}>
+                  <button className="button purple" onClick={handleRecordNewVideo} style={{width:'50%'}}> 
                     <img src={Record} alt="Record new video"/>
                     Record video
                   </button>
-                  <button className="button black" onClick={handleDownloadVideo}> 
+                  <button className="button black" onClick={handleDownloadVideo} style={{width:'50%'}}> 
                     <img src={Download} alt="Download video"/>
                     Download video
                   </button>

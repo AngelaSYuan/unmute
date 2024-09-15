@@ -27,13 +27,11 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  /* width: 100vw;
-  height: 100vh; */
-  padding-top: 70px;
-  padding-bottom: 70px;
+  /* width: 100vw; */
+  height: 100vh;
+  padding-top: 20px;
   padding-left: 220px;
   padding-right: 220px;
-  /* box-sizing: border-box; */
   justify-content: center;
   background: #F6F4EE;
 }
