@@ -38,6 +38,15 @@ function ProcessedPage() {
         }
     }, [isProcessing]);
 
+    const speakTranscription = (text) => {
+      if (!window.speechSynthesis) {
+          console.error("SpeechSynthesis API is not supported in this browser.");
+          return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+  };
+  
     const transcribeVideo = async (videoBlob) => {
         setIsProcessing(true);
         const formData = new FormData();
@@ -56,9 +65,11 @@ function ProcessedPage() {
             const data = await response.json();
             console.log('Received response from backend:', data);
             if (data.transcription) {
-                setTranscription(data.transcription);
-                console.log('Transcription set:', data.transcription);
-            } else {
+              setTranscription(data.transcription);
+              speakTranscription(data.transcription); // Speak the transcription
+              speakTranscription('');
+          }
+           else {
                 console.error('No transcription in response:', data);
                 setTranscription(`Error: ${data.error || 'Failed to transcribe video'}`);
             }
