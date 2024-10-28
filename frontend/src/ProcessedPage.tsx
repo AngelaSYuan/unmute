@@ -54,7 +54,7 @@ function ProcessedPage() {
 
         try {
             console.log('Requesting transcription...');
-            const response = await fetch('https://backend.unmutenow.co/api/transcribe', {
+            const response = await fetch('http://127.0.0.1:5000/api/transcribe', { //https://flask-unmute-backend.vercel.app/api/transcribe     https://backend.unmutenow.co/api/transcribe
                 method: 'POST',
                 body: formData,
                 credentials: 'include',
@@ -64,9 +64,9 @@ function ProcessedPage() {
             }
             const data = await response.json();
             console.log('Received response from backend:', data);
-            if (data.transcription) {
-              setTranscription(data.transcription);
-              speakTranscription(data.transcription); // Speak the transcription
+            if (data.text) {
+              setTranscription(data.text);
+              speakTranscription(data.text); // Speak the transcription
               speakTranscription('');
           }
            else {
@@ -88,7 +88,7 @@ function ProcessedPage() {
                 formData.append('video', location.state.videoBlob, 'recorded_video.webm');
 
                 console.log('Sending video for conversion...');
-                const response = await fetch('https://backend.unmutenow.co/api/convert-to-mp4', {
+                const response = await fetch('http://127.0.0.1:5000/api/convert-to-mp4', { //https://backend.unmutenow.co/api/convert-to-mp4'
                     method: 'POST',
                     body: formData,
                     credentials: 'include',
@@ -142,7 +142,7 @@ function ProcessedPage() {
                     {videoURL && (
                         <VideoPlayerWithCaptions
                             videoSrc={videoURL}
-                            captions={removeQuotes(transcription)}
+                            captions={transcription}
                         />
                     )}
                 </div>
