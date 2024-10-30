@@ -33,6 +33,8 @@ def transcribe():
     # Load the video file from the backend directory
     video_path = 'video.mp4'  # Make sure this file exists in the backend directory
 
+    # 2. ask how to temporarily save recorded video, based on existing code. and use that here instead of hardcided video.mp4 in backend folder. try using requests.file again here? 
+
     # Check if the video file exists
     if not os.path.exists(video_path):
         print("Video file does not exist:", video_path)
@@ -45,7 +47,9 @@ def transcribe():
         with open(video_path, 'rb') as video_file:
             files = {
                 'video': ('video.mp4', video_file),
-                'api_key': (None, 'xtv_YbUoW8zn-Q4gGY8s2MksmHDjecSw6blkeIPFtyQ')  # Replace with your actual API key
+                'api_key': (None, 'xtv_YbUoW8zn-Q4gGY8s2MksmHDjecSw6blkeIPFtyQ'),  # Replace with your actual API key
+                'tier': 'fast'
+                # 1. try adding fast here?
             }
 
             print("Sending request to transcription API...")
@@ -106,7 +110,7 @@ def convert_to_mp4():
     video = request.files["video"]
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_input:
-        video.save(temp_input)
+        video.save(temp_input) # ohh actually saving the file here?
         temp_input_path = temp_input.name
 
     temp_output_path = temp_input_path.replace(".webm", ".mp4")

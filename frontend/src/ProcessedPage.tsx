@@ -18,7 +18,7 @@ function ProcessedPage() {
 
     useEffect(() => {
         if (location.state && location.state.videoBlob) {
-            const url = URL.createObjectURL(location.state.videoBlob);
+            const url = URL.createObjectURL(location.state.videoBlob); //setting url from the blob location (what we recorded.)
             setVideoURL(url);
             transcribeVideo(location.state.videoBlob);
         }
@@ -50,13 +50,13 @@ function ProcessedPage() {
     const transcribeVideo = async (videoBlob) => {
         setIsProcessing(true);
         const formData = new FormData();
-        formData.append('video', videoBlob, 'recorded_video.webm');
+        formData.append('video', videoBlob, 'recorded_video.webm'); //ah adding video blob location. to request.files or ?
 
         try {
             console.log('Requesting transcription...');
             const response = await fetch('http://127.0.0.1:5000/api/transcribe', { //https://flask-unmute-backend.vercel.app/api/transcribe     https://backend.unmutenow.co/api/transcribe
                 method: 'POST',
-                body: formData,
+                body: formData, //passing in the video?
                 credentials: 'include',
             });
             if (!response.ok) {
@@ -65,9 +65,13 @@ function ProcessedPage() {
             const data = await response.json();
             console.log('Received response from backend:', data);
             if (data.text) {
+            console.log(data.text);
               setTranscription(data.text);
+              console.log("The transcription usestate:");
+              console.log(transcription);
               speakTranscription(data.text); // Speak the transcription
-              speakTranscription('');
+              
+              speakTranscription(''); //wanna reset to blank to not say it again?
           }
            else {
                 console.error('No transcription in response:', data);
@@ -140,10 +144,11 @@ function ProcessedPage() {
             <div className="videoContainer">
                 <div style={{ width: '100%', maxWidth: '640px' }}>
                     {videoURL && (
-                        <VideoPlayerWithCaptions
-                            videoSrc={videoURL}
-                            captions={transcription}
-                        />
+                        <VideoPlayerWithCaptions 
+                        videoSrc={videoURL} 
+                        captions={transcription} 
+                        key={transcription} />
+
                     )}
                 </div>
                 <div style={{display: "flex", width: '100%'}}>
