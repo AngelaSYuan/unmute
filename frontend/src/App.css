@@ -69,7 +69,7 @@
     font-weight: 600;
     text-transform: uppercase;
     white-space: nowrap;
-    animation: scroll-text 9s linear 1 forwards;
+    animation: scroll-text 7s linear 1 forwards !important;
 }
 
 .countdown {

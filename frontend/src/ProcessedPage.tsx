@@ -71,7 +71,7 @@ function ProcessedPage() {
               console.log(transcription);
               speakTranscription(data.text); // Speak the transcription
               
-              speakTranscription(''); //wanna reset to blank to not say it again?
+              //speakTranscription(''); //wanna reset to blank to not say it again?
           }
            else {
                 console.error('No transcription in response:', data);
