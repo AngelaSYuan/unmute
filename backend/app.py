@@ -27,47 +27,122 @@ CORS(
 def root():
     return "Hello World"
 
+#########
+app = Flask(__name__)
+
+# Configure upload folder and allowed file extensions
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'mp4'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure the upload folder exists
+import os
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected for uploading"}), 400
+    if file and allowed_file(file.filename):
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
+        return jsonify({"filepath": filepath}), 200
+
+############
 
 @app.route('/api/transcribe', methods=['POST'])
 def transcribe():
+    filepath = request.args.get('file_path')
+    with open(filepath, 'rb') as f:
+        files = {
+            'video': (filepath, f),
+            'api_key': (None, 'YOUR_API_KEY'), # update
+            'segment_time': (None, '20'),
+        }
+    response = requests.post('https://api.symphoniclabs.com/transcribe', files=files)
+    print(response.json())
+
+
+    # with open(filepath, 'rb') as f:
+    #         api_response = requests.post('https://example.com/api', files={'file': f})
+
+    #     return jsonify({"message": "File uploaded successfully", "api_response": api_response.json()}), 200
+    # else:
+    #     return jsonify({"error": "File type not allowed"}), 400
+
+    # if "video" not in request.files:
+    #     return jsonify({"error": "No video file uploaded"}), 400
+
+    # video_file = request.files["video"]
+    # video = io.BytesIO(video_file.read())
+
+    #####
+    # if "video" not in request.files:
+    #     return jsonify({"error": "No video file uploaded"}), 400
+
+    # video_file = request.files["video"]
+    # video = io.BytesIO(video_file.read())
+
+    # try:
+    #     url = "https://api.symphoniclabs.com/transcribe"
+    #     response = requests.post(
+    #         url, files={"video": ("input.webm", video, "video/webm")}
+    #     )
+    #     response.raise_for_status()
+    #     transcribed_text = response.text
+    #     return jsonify({"transcription": transcribed_text})
+    # except requests.exceptions.RequestException as e:
+    #     print(f"Error calling Symphonic Labs API: {e}")
+    #     return jsonify({"error": "Failed to transcribe video"}), 500
+    ##########
+
+# _EoKVaff_WJTH0gAOYAtr8fiQcWCattOnECFWmqnfrE NEW KEY.
+
     # Load the video file from the backend directory
     video_path = 'video.mp4'  # Make sure this file exists in the backend directory
 
     # 2. ask how to temporarily save recorded video, based on existing code. and use that here instead of hardcided video.mp4 in backend folder. try using requests.file again here? 
 
     # Check if the video file exists
-    if not os.path.exists(video_path):
-        print("Video file does not exist:", video_path)
-        return jsonify({"error": "Video file not found"}), 404
+    # if not os.path.exists(video_path):
+    #     print("Video file does not exist:", video_path)
+    #     return jsonify({"error": "Video file not found"}), 404
 
-    print("Using video file:", video_path)
+    # print("Using video file:", video_path)
 
-    # Prepare the request to the transcription API
-    try:
-        with open(video_path, 'rb') as video_file:
-            files = {
-                'video': ('video.mp4', video_file),
-                'api_key': (None, 'xtv_YbUoW8zn-Q4gGY8s2MksmHDjecSw6blkeIPFtyQ'),  # Replace with your actual API key
-                'tier': 'fast'
-                # 1. try adding fast here?
-            }
+    # # Prepare the request to the transcription API
+    # try:
+    #     with open(video_path, 'rb') as video_file:
+    #         files = {
+    #             'video': ('video.mp4', video_file),
+    #             'api_key': (None, 'xtv_YbUoW8zn-Q4gGY8s2MksmHDjecSw6blkeIPFtyQ'),  # Replace with your actual API key
+    #             #'tier': 'fast'
+    #             # 1. try adding fast here?
+    #         }
 
-            print("Sending request to transcription API...")
-            response = requests.post('https://api.symphoniclabs.com/transcribe', files=files)
+    #         print("Sending request to transcription API...")
+    #         response = requests.post('https://api.symphoniclabs.com/transcribe', files=files)
 
-            if response.status_code != 200:
-                print("Error calling Symphonic Labs API:", response.text)
-                return jsonify({"error": "Transcription API error", "details": response.text}), 500
+    #         if response.status_code != 200:
+    #             print("Error calling Symphonic Labs API:", response.text)
+    #             return jsonify({"error": "Transcription API error", "details": response.text}), 500
             
-            data = response.json()
-            print("Received response from transcription API:", data)
+    #         data = response.json()
+    #         print("Received response from transcription API:", data)
 
-            # Return the transcription result
-            return data
+    #         # Return the transcription result
+    #         return data
 
-    except Exception as e:
-        print("An error occurred during transcription:", str(e))
-        return jsonify({"error": "An error occurred during transcription", "details": str(e)}), 500
+    # except Exception as e:
+    #     print("An error occurred during transcription:", str(e))
+    #     return jsonify({"error": "An error occurred during transcription", "details": str(e)}), 500
 
 
 
@@ -108,10 +183,12 @@ def convert_to_mp4():
         return jsonify({"error": "No video file uploaded"}), 400
 
     video = request.files["video"]
+    print(f"Received video file: {video.filename}")  # Debug print to check the filename
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_input:
-        video.save(temp_input) # ohh actually saving the file here?
+        video.save(temp_input)  # Saving the file here
         temp_input_path = temp_input.name
+    print(f"Temporary input path: {temp_input_path}")  # Debug print for temp input path
 
     temp_output_path = temp_input_path.replace(".webm", ".mp4")
 
@@ -130,6 +207,7 @@ def convert_to_mp4():
             check=True,
             capture_output=True,
         )
+        print(f"FFmpeg output: {result.stdout.decode()}")  # Debug print for FFmpeg output
         return send_file(
             temp_output_path, as_attachment=True, download_name="converted_video.mp4"
         )
@@ -140,6 +218,7 @@ def convert_to_mp4():
         os.unlink(temp_input_path)
         if os.path.exists(temp_output_path):
             os.unlink(temp_output_path)
+
 
 
 if __name__ == '__main__':

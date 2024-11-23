@@ -1,100 +1,112 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import Header from './Header';
-import Record from './assets/record.png';
 import './App.css';
 
 function StartPage() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [isRecording, setIsRecording] = useState(false);
-    const videoRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
-    const [recordedChunks, setRecordedChunks] = useState([]);
-    const [countdown, setCountdown] = useState(null);
+    const [transcription, setTranscription] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
 
-    useEffect(() => {
-        async function setupCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-                // Start recording immediately if coming from ProcessedPage
-                if (location.search === '?record=true') {
-                    startRecording(stream);
-                }
-            } catch (err) {
-                console.error("Error accessing camera:", err);
-            }
+    // Handle file selection
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];  // Get the selected file
+        if (file) {
+            setSelectedFile(file);  // Store the selected file in state
+            console.log(file);
+            //console.log(selectedFile);
         }
-        setupCamera();
-    }, [location.search]);
+    };
 
-    const handleRecording = () => {
-        if (!isRecording) {
-            setCountdown(3);
-        } else {
-            stopRecording();
+    // Handle video file upload and transcription
+    const transcribeVideo = async (e) => {
+        e.preventDefault();  // Prevent form from refreshing the page on submit
+
+        if (!selectedFile) {
+            alert('Please select a video file to upload.');
+            return;
         }
-    }
 
-    useEffect(() => {
-        let timer;
-        if (countdown !== null && countdown > 0) {
-            timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-        } else if (countdown === 0) {
-            startRecording(videoRef.current.srcObject);
-            setCountdown(null);
-        }
-        return () => clearTimeout(timer);
-    }, [countdown]);
+        // Step 1: Upload the file
+        // let filepath;
+        // const formData = new FormData();
+        // formData.append('video', selectedFile);  // Add the selected file to FormData
 
-    const startRecording = (stream) => {
-        setIsRecording(true);
-        setRecordedChunks([]);
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        mediaRecorder.ondataavailable = handleDataAvailable;
-        mediaRecorder.start();
-    }
+        // try {
+        //     const response = await fetch('/upload', {
+        //         method: 'POST',
+        //         body: formData,  // Send the file as form data
+        //     });
 
-    const stopRecording = () => {
-        mediaRecorderRef.current.stop();
-        setIsRecording(false);
-    }
+        //     if (!response.ok) {
+        //         throw new Error('Error uploading video.');
+        //     }
 
-    const handleDataAvailable = (event) => {
-        if (event.data.size > 0) {
-            setRecordedChunks((prev) => prev.concat(event.data));
-        }
-    }
+        //     const data = await response.json();
+        //     filepath = data.filepath;  // Assuming this returns the file path after upload
+        // }
+        // catch (error) {
+        //     console.error('Error uploading video:', error);
+        //     setTranscription('Error uploading video.');
+        //     return;
+        // }
 
-    useEffect(() => {
-        if (recordedChunks.length > 0 && !isRecording) {
-            const blob = new Blob(recordedChunks, {
-                type: "video/webm"
+        // Step 2: Transcribe the MP4 video
+        try {
+            console.log('Requesting transcription...');
+            const response = await fetch(`/api/transcribe?file_path=${selectedFile}`, {
+                method: 'POST',
             });
-            navigate('/processed', { state: { videoBlob: blob } });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('Received response:', data);
+
+            if (data.transcription) {
+                setTranscription(data.transcription);
+            } else {
+                setTranscription(`Error: ${data.error || 'Failed to transcribe video'}`);
+            }
+        } catch (error) {
+            console.error('Error transcribing video:', error);
+            setTranscription('Error: Failed to transcribe video');
         }
-    }, [recordedChunks, isRecording, navigate]);
+    };
 
     return (
         <div className="container">
             <Header />
-            <div className={`videoContainer  ${isRecording && "red-border"}`}>
-                <video className = "videoEffect"ref={videoRef} autoPlay muted playsInline style={{width: '100%', height: 'auto'}} />
-                {countdown !== null && (
-                    <div className="countdown">{countdown === 0 ? 'Go!' : countdown}</div>
+            <form onSubmit={transcribeVideo}>
+                {/* File input field for the user to select a video */}
+                <input
+                    type="file"
+                    accept="video/*"  // Only allow video files
+                    onChange={handleFileChange}  // Handle file selection
+                />
+                <button type="submit" disabled={!selectedFile}>Upload Video</button>
+            </form>
+
+            {/* Display transcription here */}
+            <div>
+                {transcription ? (
+                    <div>
+                        <h3>Transcription:</h3>
+                        <p>{transcription}</p>
+                    </div>
+                ) : (
+                    <p>No transcription available.</p>
                 )}
-                <button className={`button ${isRecording ? 'red' : 'purple'}`} onClick={handleRecording} style={{width:'100%'}} disabled={countdown !== null}>
-                    <img src={Record} alt="Record button"/>
-                    {isRecording ? 'Stop recording' : 'Record video'}
-                </button>
             </div>
+
             <h3>Speak, Even When You Can't.</h3>
         </div>
     );
 }
+
+/*
+h1>Click to Open File Browser</h1> <!-- Hidden file input --> <input type="file" id="fileInput" style="display: none;" /> <!-- Custom button --> <button id="uploadButton">Select File</button> <script> // Reference to button and file input const uploadButton = document.getElementById('uploadButton'); const fileInput = document.getElementById('fileInput'); // Add event listener to button to trigger file input click uploadButton.addEventListener('click', () => { fileInput.click(); // Opens the user's file browser }); // Optional: Handle file selection fileInput.addEventListener('change', () => { if (fileInput.files.length > 0) { alert(`You selected: ${fileInput.files[0].name}`); } });
+*/
 
 export default StartPage;

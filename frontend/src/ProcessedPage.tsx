@@ -47,43 +47,75 @@ function ProcessedPage() {
       window.speechSynthesis.speak(utterance);
   };
   
-    const transcribeVideo = async (videoBlob) => {
-        setIsProcessing(true);
-        const formData = new FormData();
-        formData.append('video', videoBlob, 'recorded_video.webm'); //ah adding video blob location. to request.files or ?
+  const transcribeVideo = async (videoBlob) => {
+    setIsProcessing(true);
+    
+    // Step 1: Convert video to MP4
+    const mp4Blob = await convertVideoToMp4(videoBlob);
+    if (!mp4Blob) {
+        setIsProcessing(false);
+        return; // If conversion fails, exit the function
+    }
 
-        try {
-            console.log('Requesting transcription...');
-            const response = await fetch('http://127.0.0.1:5000/api/transcribe', { //https://flask-unmute-backend.vercel.app/api/transcribe     https://backend.unmutenow.co/api/transcribe
-                method: 'POST',
-                body: formData, //passing in the video?
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log('Received response from backend:', data);
-            if (data.text) {
-            console.log(data.text);
-              setTranscription(data.text);
-              console.log("The transcription usestate:");
-              console.log(transcription);
-              speakTranscription(data.text); // Speak the transcription
-              
-              //speakTranscription(''); //wanna reset to blank to not say it again?
-          }
-           else {
-                console.error('No transcription in response:', data);
-                setTranscription(`Error: ${data.error || 'Failed to transcribe video'}`);
-            }
-        } catch (error) {
-            console.error('Error transcribing video:', error);
-            setTranscription(`Error: ${error.message || 'Failed to transcribe video'}`);
-        } finally {
-            setIsProcessing(false);
+    // Step 2: Transcribe the MP4 video
+    const formData = new FormData();
+    formData.append('video', mp4Blob, 'recorded_video.mp4'); // Now sending mp4 video
+
+    try {
+        console.log('Requesting transcription...');
+        const response = await fetch('https://api.symphoniclabs.com/transcribe', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
-    };
+
+        const data = await response.json();
+        console.log('Received response:', data);
+        
+        if (data.transcription) { 
+            setTranscription(data.transcription);
+            speakTranscription(data.transcription);
+        } else {
+            setTranscription(`Error: ${data.error || 'Failed to transcribe video'}`);
+        }
+    } catch (error) {
+        console.error('Error transcribing video:', error);
+        setTranscription(`Error: ${error.message || 'Failed to transcribe video'}`);
+    } finally {
+        setIsProcessing(false);
+    }
+};
+
+const convertVideoToMp4 = async (videoBlob) => {
+    const formData = new FormData();
+    formData.append('video', videoBlob, 'recorded_video.webm'); // Send the webm file for conversion
+
+    try {
+        console.log('Sending video for conversion...');
+        const response = await fetch('http://127.0.0.1:5000/api/convert-to-mp4', { // Make sure this URL is correct
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        console.log('Conversion successful, returning MP4 Blob...');
+        return await response.blob(); // Return the converted MP4 blob
+    } catch (error) {
+        console.error('Error converting video:', error);
+        alert(`Failed to convert video: ${error.message}`);
+        return null; // Return null if conversion fails
+    }
+};
+
 
     const handleDownloadVideo = async () => {
         if (location.state && location.state.videoBlob) {

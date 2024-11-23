@@ -53,7 +53,7 @@ const VideoPlayerWithCaptions: React.FC<VideoPlayerWithCaptionsProps> = ({ video
         <div style={{ position: 'relative', overflow:'hidden'}}>
             <video
                 ref={videoRef}
-                src={videoSrc}
+                src={videoSrc} // this is the video location
                 style={{ borderRadius: '12px' }}
                 onClick={togglePlayPause}
             />
