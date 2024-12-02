@@ -16,6 +16,13 @@
     background: rgba(101, 61, 187, 0.10);
 }
 
+.input-button-group {
+    display: flex;
+    align-items: center;
+    gap: 16px; /* Adjust the spacing between elements as needed */
+    margin-bottom: 16px; 
+}
+
 .button{
     border-radius: 500px;
     border: 1px solid rgba(255, 255, 255, 0.60);
@@ -29,10 +36,16 @@
     align-items: center;
     gap: 16px;
 
+    flex: 1;
+    text-align: center;
     color: #FFF;
     font-size: 20px;
     text-transform: uppercase;
     font-weight: 600;
+}
+
+label.button {
+    cursor: pointer;
 }
 
 .purple{
@@ -61,6 +74,7 @@
 .scrolling-text {
     position: absolute;
     bottom: 10%;
+    width: 100%;
     text-align: center;
     font-family: "DM Sans";
     color: white;
@@ -93,6 +107,28 @@
         transform: translateX(-100%);
     }
 }
+
+p {
+    color: black;
+    font-family: "DM Sans";
+    font-size: 18px;
+    font-weight: 500;
+}
+
+h1 {
+    color: rgba(101, 61, 187, 0.50);
+    font-family: "DM Sans";
+    font-size: 40px;
+    font-weight: 900;
+    text-align: center;
+}
+
+h2 {
+    color: black;
+    font-family: "DM Sans";
+    font-size: 20px;
+    font-weight: 600;
+} 
 
 h3 {
     color: rgba(0, 0, 0, 0.50);
@@ -132,4 +168,45 @@ video {
     padding: 20px;
     border-radius: 5px;
     text-align: center;
+}
+
+.video-control-button {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    width: 50px; /* Fixed width */
+    height: 50px; /* Fixed height */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #FFFFFF;
+    cursor: pointer;
+
+    /* Prevent the button from resizing */
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.control-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.control-icon.play {
+    font-size: 24px; /* Base size */
+}
+
+.control-icon.stop {
+    font-size: 48px; /* Increase size to match play icon */
+}
+
+.control-icon.replay {
+    font-size: 36px; /* Adjust size to match play icon */
 }

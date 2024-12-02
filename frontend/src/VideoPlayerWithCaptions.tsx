@@ -1,86 +1,116 @@
+// VideoPlayerWithCaptions.tsx
+
 import React, { useRef, useEffect, useState } from 'react';
 
 interface VideoPlayerWithCaptionsProps {
     videoSrc: string;
-    captions: string;
+    captions: string; // We'll keep this prop for speech synthesis
 }
 
 const VideoPlayerWithCaptions: React.FC<VideoPlayerWithCaptionsProps> = ({ videoSrc, captions }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const captionsRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isEnded, setIsEnded] = useState(false);
 
     useEffect(() => {
         const video = videoRef.current;
-        const captionsElement = captionsRef.current;
 
-        if (video && captionsElement) {
-            const updateCaptions = () => {
-                const progress = video.currentTime / video.duration;
-                const scrollAmount = (captionsElement.scrollHeight - captionsElement.clientHeight) * progress;
-                captionsElement.scrollTop = scrollAmount;
+        if (video) {
+            const handlePlay = () => {
+                setIsPlaying(true);
+                setIsEnded(false);
+
+                // Start speech synthesis
+                window.speechSynthesis.cancel(); // Cancel any existing speech
+                const utterance = new SpeechSynthesisUtterance(captions);
+                window.speechSynthesis.speak(utterance);
             };
 
-            video.addEventListener('timeupdate', updateCaptions);
-            return () => video.removeEventListener('timeupdate', updateCaptions);
+            const handleEnded = () => {
+                setIsPlaying(false);
+                setIsEnded(true);
+
+                // Stop speech synthesis
+                window.speechSynthesis.cancel();
+            };
+
+            const handlePause = () => {
+                setIsPlaying(false);
+
+                // Pause speech synthesis
+                window.speechSynthesis.pause();
+            };
+
+            video.addEventListener('play', handlePlay);
+            video.addEventListener('ended', handleEnded);
+            video.addEventListener('pause', handlePause);
+
+            return () => {
+                video.removeEventListener('play', handlePlay);
+                video.removeEventListener('ended', handleEnded);
+                video.removeEventListener('pause', handlePause);
+            };
         }
     }, [captions]);
 
-    const togglePlayPause = () => {
+    const handleControlButtonClick = () => {
         const video = videoRef.current;
         if (video) {
-            if (video.paused) {
-                playAnimation();
-                video.play();
-                setIsPlaying(true);
-            } else {
+            if (isPlaying) {
+                // Pause the video
                 video.pause();
                 setIsPlaying(false);
+
+                // Pause speech synthesis
+                window.speechSynthesis.pause();
+            } else if (isEnded || video.currentTime > 0) {
+                // Replay the video from the beginning
+                video.currentTime = 0;
+                window.speechSynthesis.cancel(); // Cancel any existing speech
+                video.play();
+            } else {
+                // Start playing the video from the beginning
+                window.speechSynthesis.cancel(); // Cancel any existing speech
+                video.play();
             }
         }
     };
 
-    const playAnimation = () => {
-        const video = videoRef.current;
-        if (captionsRef.current && videoRef.current) {
-            captionsRef.current.style.animation = 'none';
-            captionsRef.current.offsetHeight;
-            captionsRef.current.style.animation =  `scroll-text ${video.duration}s linear 1 forwards`;
-        }
-    };
+    // Determine the icon based on the state
+    let controlIcon = '';
+    let controlLabel = '';
+    let iconClass = '';
+
+    if (isPlaying) {
+        controlIcon = '■'; // Stop icon
+        controlLabel = 'Stop';
+        iconClass = 'stop';
+    } else if (isEnded || (!isPlaying && videoRef.current && videoRef.current.currentTime > 0)) {
+        controlIcon = '↻'; // Replay icon
+        controlLabel = 'Replay';
+        iconClass = 'replay';
+    } else {
+        controlIcon = '▶'; // Play icon
+        controlLabel = 'Play';
+        iconClass = 'play';
+    }
 
     return (
-        <div style={{ position: 'relative', overflow:'hidden'}}>
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
             <video
                 ref={videoRef}
-                src={videoSrc} // this is the video location
-                style={{ borderRadius: '12px' }}
-                onClick={togglePlayPause}
+                src={videoSrc}
+                style={{ borderRadius: '12px', width: '100%' }}
+                controls={false} // Hide default controls
             />
-            <div
-                ref={captionsRef}
-                className="scrolling-text"
-                id="scroll-text"
-            >
-                {captions}
-            </div>
+            {/* Captions overlay removed */}
+            {/* Custom Control Button */}
             <button
-                onClick={togglePlayPause}
-                style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    fontSize: '48px',
-                    background: 'none',
-                    border: 'none',
-                    color: 'white',
-                    cursor: 'pointer',
-                    opacity: isPlaying ? 0 : 1,
-                    transition: 'opacity 0.3s',
-                }}
+                onClick={handleControlButtonClick}
+                className="video-control-button"
+                aria-label={controlLabel}
             >
-                {isPlaying ? '❚❚' : '▶'}
+                <span className={`control-icon ${iconClass}`}>{controlIcon}</span>
             </button>
         </div>
     );
